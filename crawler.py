@@ -28,7 +28,14 @@ lists=webb.find_all_links(web_name)
 all_links=[]
 for link in lists:
 	all_links+=webb.find_all_links(link)
+	
+sorted_links=[]
+for link in all_links:
+	if link not in sorted_links:
+		if((link != "#") and (link.startswith('http'))):
+			sorted_links.append(link)
 
+print("\nTotal links to crawl- "+str(len(sorted_links))+"\n")	
 print("starting...")
 row=1
 worksheet.set_column(1,1,60)
@@ -47,38 +54,37 @@ worksheet.write('E1' , 'HEADINGS' , bold)
 worksheet.write('F1' , 'SUB HEADINGS' , bold)
 worksheet.write('G1' , 'EMAILS PRESENT' , bold)
 c=1
+flag=0
 dlist=[]
-for link in all_links:
-	if((link != "#") and (link.startswith('http'))):
-		print("crawling link-"+str(c))
-		headings=webb.get_all_headings("\n"+link,"h1","list")
-		subheadings=webb.get_all_headings("\n"+link,"h2","list")
-		title=str(webb.page_title(link))
-		o=urlparse((link))
-		stri=o.netloc
-		worksheet.write(row,0,stri)
-		#print(link)
-		worksheet.write_string(row,1, link, cell_format)
-		ip=socket.gethostbyname(stri)
-		worksheet.write(row,2, ip)
-		if headings:
-			worksheet.write(row,4, '\n'.join(headings), cell_format)
-		if subheadings:		
-			worksheet.write(row,5, '\n'.join(subheadings), cell_format)
-		worksheet.write(row,3, title, cell_format)
-		row+=1
-		page=webb.download_page(link)
-		c_page=webb.clean_page(page)
-		if "@" in c_page:
-			match=re.findall('[a-z]+@\S+', c_page)
-			if match:
-				worksheet.write(row,6,'\n'.join(match), cell_format)
-		c+=1
-		fname="webpages/"+stri+"-"+str(c)+".html"
-		file1=open(fname,"w")
-		file1.write(page)
-		dlist.append(stri)
-
+for link in sorted_links:
+	print("crawling link-"+str(c))
+	headings=webb.get_all_headings("\n"+link,"h1","list")
+	subheadings=webb.get_all_headings("\n"+link,"h2","list")
+	title=str(webb.page_title(link))
+	o=urlparse((link))
+	stri=o.netloc
+	worksheet.write(row,0,stri)
+	#print(link)
+	worksheet.write_string(row,1, link, cell_format)
+	ip=socket.gethostbyname(stri)
+	worksheet.write(row,2, ip)
+	if headings:
+		worksheet.write(row,4, '\n'.join(headings), cell_format)
+	if subheadings:		
+		worksheet.write(row,5, '\n'.join(subheadings), cell_format)
+	worksheet.write(row,3, title, cell_format)
+	row+=1
+	page=webb.download_page(link)
+	c_page=webb.clean_page(page)
+	if "@" in c_page:
+		match=re.findall('[a-z]+@\S+', c_page)
+		if match:
+			worksheet.write(row,6,'\n'.join(match), cell_format)
+	c+=1
+	fname="webpages/"+stri+"-"+str(c)+".html"
+	file1=open(fname,"w")
+	file1.write(page)
+	dlist.append(stri)
 z=Counter(dlist)
 worksheet.write(row+1,0, 'DOMAIN' , bold)
 worksheet.write(row+1,1, 'COUNT' , bold)
@@ -93,4 +99,4 @@ chart.set_title({'name':'Links in each domain'})
 chart.set_style(10)
 worksheet.insert_chart(end+3,0,chart)	
 workbook.close()
-print("\n Please check the current directory for the excel sheet and webpages folder having crawled information and webpages")
+print("\n Please check the current directory for the excel sheet having crawled information")
