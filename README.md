@@ -20,6 +20,7 @@ Following things needs to be validated before running the programme:
     Execute the program in Linux to avoid downloading extra libraries.
 
 It also generates a Pie chart based on number of links of each domain present.
+
 Following libraries might be needing an installation:
 
     xlsxwriter (pip install xlsxwriter)
